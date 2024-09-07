@@ -74,27 +74,26 @@ export default class extends Controller {
 
     const optionStartTime = document.getElementById('optionStartTime');
     optionStartTime.innerHTML = '';
-    const option = document.createElement("option");
-    const option2 = document.createElement("option");
-    option.value = "10:00";
-    option.text = "10:00";
-    option2.value = "11:00";
-    option2.text = "11:00";
-    optionStartTime.appendChild(option);
-    optionStartTime.appendChild(option2);
-
     const optionEndTime = document.getElementById('optionEndTime');
     optionEndTime.innerHTML = '';
-    const option3 = document.createElement("option");
-    const option4 = document.createElement("option");
-    option3.value = "11:00";
-    option3.text = "11:00";
-    option4.value = "12:00";
-    option4.text = "12:00";
-    optionEndTime.appendChild(option3);
-    optionEndTime.appendChild(option4);
 
-  }
+    const optionStart = document.createElement("option");
+    optionStart.value = this.startTime;
+    optionStart.text = this.startTime;
+    optionStartTime.appendChild(optionStart);
+
+    timeSlots.forEach((slot,index) => {
+      if (index > 0) {
+        const optionEnd = document.createElement("option");
+        optionEnd.value = slot;
+        optionEnd.text = slot;
+        if (index === timeSlots.length - 1) {
+          optionEnd.selected = true;
+        }
+        optionEndTime.appendChild(optionEnd);
+    }
+    });
+}
 
   highLightCell(cell) {
     if (!this.selectedCells.includes(cell)) {
