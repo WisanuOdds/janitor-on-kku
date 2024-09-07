@@ -1,9 +1,8 @@
 <!-- Modal -->
-<div id="myModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+<div id="reservesModal" class="fixed inset-0 items-center justify-center bg-black bg-opacity-50 hidden">
   <div class="bg-white p-6 rounded-lg w-1/3">
     <div class="flex justify-between items-center">
       <h5 class="text-lg font-bold">Modal title</h5>
-      <button id="closeModal" class="text-gray-500 hover:text-gray-800">&times;</button>
     </div>
     <div class="mt-4">
       <!-- Modal body content -->
@@ -36,7 +35,7 @@
       </form>
     </div>
     <div class="mt-6 flex justify-between space-x-4">
-      <button id="cancelButton" type="button" class="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+      <button data-action="click->reserves#closeModal" id="cancelButton" type="button" class="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
         Cancel
       </button>
       <button id="confirmButton" type="button" class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-5 py-3 text-sm font-medium text-gray-600 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">

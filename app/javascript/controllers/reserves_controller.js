@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus";
-import {openModal} from "../modal";
 
 export default class extends Controller {
   static targets = ["cell", "options"];
@@ -63,6 +62,11 @@ export default class extends Controller {
     if (!this.dragging) return;
     this.dragging = false;
 
+    // modal
+    const modal = document.getElementById('reservesModal');
+    modal.classList.add('flex');
+    modal.classList.remove('hidden');
+
     this.endTime = event.currentTarget.dataset.endTime;
     console.log('endTime: ' + this.endTime);
   }
@@ -82,4 +86,15 @@ export default class extends Controller {
   getRowIndex(cell) {
     return cell.closest('tr').rowIndex;
   }
+
+  closeModal() {
+    const modal = document.getElementById('reservesModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+  }
+
 }
+
+
+

@@ -1,171 +1,171 @@
-name: Janitor on Rails Development
+# name: Janitor on Rails Development
 
-on:
-  push:
-    branches: ["dev"]
+# on:
+#   push:
+#     branches: ["dev"]
 
-env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: oddsteam/odds-janitor
-  DEPLOY_PATH: ~/janitor-on-rails
+# env:
+#   # Use docker.io for Docker Hub if empty
+#   REGISTRY: ghcr.io
+#   # github.repository as <account>/<repo>
+#   IMAGE_NAME: oddsteam/odds-janitor
+#   DEPLOY_PATH: ~/janitor-on-rails
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Cache Ruby gems
-        uses: actions/cache@v3
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
+#       - name: Cache Ruby gems
+#         uses: actions/cache@v3
+#         with:
+#           path: vendor/bundle
+#           key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-gems-
 
-      - name: Set up Ruby and dependencies
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3.1
-          bundler-cache: true
+#       - name: Set up Ruby and dependencies
+#         uses: ruby/setup-ruby@v1
+#         with:
+#           ruby-version: 3.3.1
+#           bundler-cache: true
 
-      - name: Update RubyGems
-        run: gem update --system
+#       - name: Update RubyGems
+#         run: gem update --system
 
-      - name: Install dependencies
-        run: |
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
+#       - name: Install dependencies
+#         run: |
+#           bundle config path vendor/bundle
+#           bundle install --jobs 4 --retry 3
 
-      - name: Run tests and generate coverage report
-        run: |
-          set -o pipefail
-          bundle exec rspec || true
-          # cat coverage/.last_run.json
+#       - name: Run tests and generate coverage report
+#         run: |
+#           set -o pipefail
+#           bundle exec rspec || true
+#           # cat coverage/.last_run.json
 
-      - name: Check code coverage
-        run: |
-          COVERAGE=$(jq '.coverage_percent' coverage/coverage.json)
-          if (( $(echo "$COVERAGE < 40.0" | bc -l) )); then
-            echo "Code coverage ($COVERAGE%) is below the required threshold of 40%"
-            exit 1
-          fi
-  # We don't need lint for now
-  lint:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#       - name: Check code coverage
+#         run: |
+#           COVERAGE=$(jq '.coverage_percent' coverage/coverage.json)
+#           if (( $(echo "$COVERAGE < 40.0" | bc -l) )); then
+#             echo "Code coverage ($COVERAGE%) is below the required threshold of 40%"
+#             exit 1
+#           fi
+#   # We don't need lint for now
+#   lint:
+#     needs: test
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Set up Ruby and dependencies
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3.1
-          bundler-cache: true
+#       - name: Set up Ruby and dependencies
+#         uses: ruby/setup-ruby@v1
+#         with:
+#           ruby-version: 3.3.1
+#           bundler-cache: true
 
-      - name: Update RubyGems
-        run: gem update --system
+#       - name: Update RubyGems
+#         run: gem update --system
 
-      - name: Install dependencies
-        run: |
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
+#       - name: Install dependencies
+#         run: |
+#           bundle config path vendor/bundle
+#           bundle install --jobs 4 --retry 3
 
-      - name: Check File Permissions
-        run: ls -la
+#       - name: Check File Permissions
+#         run: ls -la
 
-      - name: Security audit dependencies
-        run: bundle exec bundler-audit --update
+#       - name: Security audit dependencies
+#         run: bundle exec bundler-audit --update
 
-      - name: Security audit application code
-        run: bundle exec brakeman -q -w2
+#       - name: Security audit application code
+#         run: bundle exec brakeman -q -w2
 
-  build:
-    needs: lint
-    runs-on: ubuntu-latest
-    outputs:
-      image_tags: ${{ steps.meta.outputs.tags }}
+#   build:
+#     needs: lint
+#     runs-on: ubuntu-latest
+#     outputs:
+#       image_tags: ${{ steps.meta.outputs.tags }}
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
+#       - name: Cache Docker layers
+#         uses: actions/cache@v3
+#         with:
+#           path: /tmp/.buildx-cache
+#           key: ${{ runner.os }}-buildx-${{ github.sha }}
+#           restore-keys: |
+#             ${{ runner.os }}-buildx-
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Log in to Docker Hub
+#         uses: docker/login-action@v1
+#         with:
+#           registry: ghcr.io
+#           username: ${{ github.actor }}
+#           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=sha,prefix={{branch}}-,format=short
+#       - name: Extract Docker metadata
+#         id: meta
+#         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+#         with:
+#           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+#           tags: |
+#             type=sha,prefix={{branch}}-,format=short
 
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ steps.meta.outputs.tags }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          labels: ${{ steps.meta.outputs.labels }}
+#       - name: Build and Push Docker Image
+#         uses: docker/build-push-action@v3
+#         with:
+#           context: .
+#           push: true
+#           tags: |
+#             ${{ steps.meta.outputs.tags }}
+#             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+#           labels: ${{ steps.meta.outputs.labels }}
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+#   deploy:
+#     needs: build
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
 
-      - name: Setup Pritunl Profile and Start VPN Connection
-        uses: nathanielvarona/pritunl-client-github-action@v1
-        with:
-          profile-file: ${{ secrets.PRITUNL_PROFILE_FILE }}
-          profile-pin: ${{ secrets.PRITUNL_PROFILE_PIN }}
+#       - name: Setup Pritunl Profile and Start VPN Connection
+#         uses: nathanielvarona/pritunl-client-github-action@v1
+#         with:
+#           profile-file: ${{ secrets.PRITUNL_PROFILE_FILE }}
+#           profile-pin: ${{ secrets.PRITUNL_PROFILE_PIN }}
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_ODDS_CLOUD_KEY }}
-      - name: Login GitHub
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }} 'echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin'
+#       - name: Set up SSH
+#         uses: webfactory/ssh-agent@v0.9.0
+#         with:
+#           ssh-private-key: ${{ secrets.SSH_PRIVATE_ODDS_CLOUD_KEY }}
+#       - name: Login GitHub
+#         run: ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }} 'echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin'
 
-      - name: Copy Docker compose file to VM
-        run: scp -o StrictHostKeyChecking=no docker-compose-dev.yml ubuntu@${{ secrets.HOST_IP_ODDS_CLOUD }}:${{ env.DEPLOY_PATH }}
+#       - name: Copy Docker compose file to VM
+#         run: scp -o StrictHostKeyChecking=no docker-compose-dev.yml ubuntu@${{ secrets.HOST_IP_ODDS_CLOUD }}:${{ env.DEPLOY_PATH }}
 
-      - name: Set up and copy env file
-        env:
-          ENV: ${{ secrets.ENV_DEV }}
-        run: echo $ENV > .env
+#       - name: Set up and copy env file
+#         env:
+#           ENV: ${{ secrets.ENV_DEV }}
+#         run: echo $ENV > .env
 
-      - name: Copy env file
-        run: scp -o StrictHostKeyChecking=no .env ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }}:${{ env.DEPLOY_PATH }}
+#       - name: Copy env file
+#         run: scp -o StrictHostKeyChecking=no .env ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }}:${{ env.DEPLOY_PATH }}
 
-      - name: Build Docker compose
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }} 'cd ${{ env.DEPLOY_PATH }} && docker compose -f docker-compose-dev.yml pull'
+#       - name: Build Docker compose
+#         run: ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }} 'cd ${{ env.DEPLOY_PATH }} && docker compose -f docker-compose-dev.yml pull'
 
-      - name: Run Docker compose
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }} 'cd ${{ env.DEPLOY_PATH }} && docker compose -f docker-compose-dev.yml up -d'
+#       - name: Run Docker compose
+#         run: ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }} 'cd ${{ env.DEPLOY_PATH }} && docker compose -f docker-compose-dev.yml up -d'
 
-      - name: clear docker image
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }} 'cd ${{ env.DEPLOY_PATH }} && docker image prune -f'
+#       - name: clear docker image
+#         run: ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME_ODDS_CLOUD }}@${{ secrets.HOST_IP_ODDS_CLOUD }} 'cd ${{ env.DEPLOY_PATH }} && docker image prune -f'
