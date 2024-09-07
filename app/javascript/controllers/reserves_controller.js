@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ["cell", "options"];
+  static targets = ["cell"];
   dragging = false;
   selectedCells = [];
   startRow = null;
@@ -10,21 +10,31 @@ export default class extends Controller {
   endTime = null;
 
   option() {
-    this.optionsTarget.innerHTML = '';
-
-    console.log('option');
-    let option1 = document.createElement("option");
-    option1.value = "10:00";
-    option1.text = "10:00";
-
-    // สร้าง <option> element สำหรับ 11:00
-    let option2 = document.createElement("option");
+    console.log('option function');
+    const optionStartTime = document.getElementById('optionStartTime');
+    optionStartTime.innerHTML = '';
+    const option = document.createElement("option");
+    const option2 = document.createElement("option");
+    option.value = "10:00";
+    option.text = "10:00";
     option2.value = "11:00";
     option2.text = "11:00";
+    optionStartTime.appendChild(option);
+    optionStartTime.appendChild(option2);
 
-    // เพิ่ม <option> elements เข้าไปใน optionTarget
-    this.optionsTarget.appendChild(option1);
-    this.optionsTarget.appendChild(option2);
+
+
+    const optionEndTime = document.getElementById('optionEndTime');
+    optionEndTime.innerHTML = '';
+    const option3 = document.createElement("option");
+    const option4 = document.createElement("option");
+    option3.value = "11:00";
+    option3.text = "11:00";
+    option4.value = "12:00";
+    option4.text = "12:00";
+    optionEndTime.appendChild(option3);
+    optionEndTime.appendChild(option4);
+    
   }
 
   handleStart(event) {
@@ -34,7 +44,7 @@ export default class extends Controller {
     this.startRow = this.getRowIndex(event.currentTarget); // ลาก row เปลี่ยนสี
     this.highLightCell(event.currentTarget); // ตัวเปลี่ยนสี
 
-    this.startTime = event.currentTarget.dataset.hour;
+    this.startTime = event.currentTarget.dataset.startTime;
     console.log('startTime: ' + this.startTime);
   }
   
@@ -62,10 +72,7 @@ export default class extends Controller {
     if (!this.dragging) return;
     this.dragging = false;
 
-    // modal
-    const modal = document.getElementById('reservesModal');
-    modal.classList.add('flex');
-    modal.classList.remove('hidden');
+    this.openModal();
 
     this.endTime = event.currentTarget.dataset.endTime;
     console.log('endTime: ' + this.endTime);
@@ -85,6 +92,15 @@ export default class extends Controller {
 
   getRowIndex(cell) {
     return cell.closest('tr').rowIndex;
+  }
+
+  openModal() {
+      const modal = document.getElementById('reservesModal');
+      this.option();
+    if (modal) {
+      modal.classList.add('flex');
+      modal.classList.remove('hidden');
+    }
   }
 
   closeModal() {

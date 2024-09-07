@@ -93,9 +93,10 @@
                       class="border border-slate-200 min-w-[60px] text-center cursor-pointer p-0 transition duration-300"
                       data-action="mousedown->reserves#handleStart mousemove->reserves#handleMove mouseup->reserves#handleEnd touchmove->reserves#handleTouchMove"
                       data-room="<%= room_index %>" 
-                      data-hour="<%= (current_hour_index / 2 + 8).to_s.rjust(2, '0') + (current_hour_index.even? ? ":00" : ":30") %>" 
+                      data-start-time="<%= (current_hour_index / 2 + 8).to_s.rjust(2, '0') + (current_hour_index.even? ? ":00" : ":30") %>" 
                       data-end-time="<%= ((current_hour_index + 1) / 2 + 8).to_s.rjust(2, '0') + (current_hour_index.even? ? ":30" : ":00") %>"
-                      data-reserves-target="cell">
+                      data-reserves-target="cell"
+                      >
                     </td>
                     <% current_hour_index += 1 %>
                   <% end %>
@@ -107,10 +108,8 @@
       </div>
     </div>
   </div>
-  <%= render 'reserves/modalform' %>
+    <%= render 'reserves/modalform' %>
 </div>
-<%= render 'reserves/modalform' %>
-
 <% if @reserve.present? %>
   <%= render 'reserves/modal_detail', reserve: @reserve %>
 <% end %>
