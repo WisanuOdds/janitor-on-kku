@@ -9,33 +9,22 @@ export default class extends Controller {
   startTime = null;
   endTime = null;
 
-  option() {
-    console.log('option function');
-    const optionStartTime = document.getElementById('optionStartTime');
-    optionStartTime.innerHTML = '';
-    const option = document.createElement("option");
-    const option2 = document.createElement("option");
-    option.value = "10:00";
-    option.text = "10:00";
-    option2.value = "11:00";
-    option2.text = "11:00";
-    optionStartTime.appendChild(option);
-    optionStartTime.appendChild(option2);
+  
+  
+  generateTimeSlots(startTime, endTime) {
+    const timeSlots = [];
+    let currentTime = new Date(`1970-01-01T${startTime}:00`);
+    const endTimeDate = new Date(`1970-01-01T${endTime}:00`);
 
-
-
-    const optionEndTime = document.getElementById('optionEndTime');
-    optionEndTime.innerHTML = '';
-    const option3 = document.createElement("option");
-    const option4 = document.createElement("option");
-    option3.value = "11:00";
-    option3.text = "11:00";
-    option4.value = "12:00";
-    option4.text = "12:00";
-    optionEndTime.appendChild(option3);
-    optionEndTime.appendChild(option4);
-    
+    while (currentTime <= endTimeDate) {
+        const hours = String(currentTime.getHours()).padStart(2, '0');
+        const minutes = String(currentTime.getMinutes()).padStart(2, '0');
+        timeSlots.push(`${hours}:${minutes}`);
+        currentTime.setMinutes(currentTime.getMinutes() + 30);
+    }
+    return timeSlots;
   }
+
 
   handleStart(event) {
     event.preventDefault();
@@ -71,11 +60,40 @@ export default class extends Controller {
     event.preventDefault();
     if (!this.dragging) return;
     this.dragging = false;
-
-    this.openModal();
-
     this.endTime = event.currentTarget.dataset.endTime;
     console.log('endTime: ' + this.endTime);
+    this.option();
+    this.openModal();
+  
+  }
+
+  option() {
+    console.log('option function');
+    const timeSlots = this.generateTimeSlots(this.startTime, this.endTime);
+    console.log(timeSlots);
+
+    const optionStartTime = document.getElementById('optionStartTime');
+    optionStartTime.innerHTML = '';
+    const option = document.createElement("option");
+    const option2 = document.createElement("option");
+    option.value = "10:00";
+    option.text = "10:00";
+    option2.value = "11:00";
+    option2.text = "11:00";
+    optionStartTime.appendChild(option);
+    optionStartTime.appendChild(option2);
+
+    const optionEndTime = document.getElementById('optionEndTime');
+    optionEndTime.innerHTML = '';
+    const option3 = document.createElement("option");
+    const option4 = document.createElement("option");
+    option3.value = "11:00";
+    option3.text = "11:00";
+    option4.value = "12:00";
+    option4.text = "12:00";
+    optionEndTime.appendChild(option3);
+    optionEndTime.appendChild(option4);
+
   }
 
   highLightCell(cell) {
@@ -96,7 +114,6 @@ export default class extends Controller {
 
   openModal() {
       const modal = document.getElementById('reservesModal');
-      this.option();
     if (modal) {
       modal.classList.add('flex');
       modal.classList.remove('hidden');
