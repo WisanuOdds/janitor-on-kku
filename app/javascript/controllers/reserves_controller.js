@@ -9,23 +9,6 @@ export default class extends Controller {
   startTime = null;
   endTime = null;
 
-  
-  
-  generateTimeSlots(startTime, endTime) {
-    const timeSlots = [];
-    let currentTime = new Date(`1970-01-01T${startTime}:00`);
-    const endTimeDate = new Date(`1970-01-01T${endTime}:00`);
-
-    while (currentTime <= endTimeDate) {
-        const hours = String(currentTime.getHours()).padStart(2, '0');
-        const minutes = String(currentTime.getMinutes()).padStart(2, '0');
-        timeSlots.push(`${hours}:${minutes}`);
-        currentTime.setMinutes(currentTime.getMinutes() + 30);
-    }
-    return timeSlots;
-  }
-
-
   handleStart(event) {
     event.preventDefault();
     this.dragging = true;
@@ -67,6 +50,36 @@ export default class extends Controller {
   
   }
 
+  highLightCell(cell) {
+    if (!this.selectedCells.includes(cell)) {
+      this.selectedCells.push(cell);
+      cell.classList.add("bg-blue-300");
+    }
+  }
+  
+  removeHighlightCell() {
+    this.selectedCells.forEach(cell => cell.classList.remove("bg-blue-300"));
+    this.selectedCells = [];
+  }
+
+  getRowIndex(cell) {
+    return cell.closest('tr').rowIndex;
+  }
+
+  generateTimeSlots(startTime, endTime) {
+    const timeSlots = [];
+    let currentTime = new Date(`1970-01-01T${startTime}:00`);
+    const endTimeDate = new Date(`1970-01-01T${endTime}:00`);
+
+    while (currentTime <= endTimeDate) {
+        const hours = String(currentTime.getHours()).padStart(2, '0');
+        const minutes = String(currentTime.getMinutes()).padStart(2, '0');
+        timeSlots.push(`${hours}:${minutes}`);
+        currentTime.setMinutes(currentTime.getMinutes() + 30);
+    }
+    return timeSlots;
+  }
+
   option() {
     console.log('option function');
     const timeSlots = this.generateTimeSlots(this.startTime, this.endTime);
@@ -94,22 +107,6 @@ export default class extends Controller {
     }
     });
 }
-
-  highLightCell(cell) {
-    if (!this.selectedCells.includes(cell)) {
-      this.selectedCells.push(cell);
-      cell.classList.add("bg-blue-300");
-    }
-  }
-  
-  removeHighlightCell() {
-    this.selectedCells.forEach(cell => cell.classList.remove("bg-blue-300"));
-    this.selectedCells = [];
-  }
-
-  getRowIndex(cell) {
-    return cell.closest('tr').rowIndex;
-  }
 
   openModal() {
       const modal = document.getElementById('reservesModal');
